@@ -5,15 +5,15 @@ import java.io.File
 
 fun main() {
     val threads = 10
+    val max = 10000000000L
     val scale = 1000000000L
 
     var measurements = mutableListOf<Measurement>()
-    for(i in scale..scale * 10 step scale) {
+    for(i in scale..max step scale) {
 //        val totalWork = 10F.pow(i).toLong()
-        var totalWork = i.toLong()
-        println(totalWork)
+        var totalWork = i
+        println(i)
         var results = mutableListOf<Result>()
-
         results.addAll(isolated(totalWork, threads))
         results.addAll(returned(totalWork, threads))
         results.addAll(shared(totalWork, threads))

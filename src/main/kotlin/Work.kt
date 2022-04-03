@@ -21,13 +21,23 @@ fun workShared(max: Long, sharedCounter: Counter) {
 
 suspend fun workAsync(max: Long): Deferred<Long> = coroutineScope {
     async {
-        return@async work(max)
+        // TODO: If the non suspend func work() is used, coroutines will be slower than single thread
+        var counter = 0L
+        for (i in 1..max) {
+            counter++
+        }
+        if (counter != max) {
+            println("Counter mismatch")
+        }
+        return@async max
     }
 }
 
 suspend fun workSharedAsync(max: Long, sharedCounter: Counter): Deferred<Unit> = coroutineScope {
     async {
-        workShared(max, sharedCounter)
+        for (i in 1..max) {
+            sharedCounter.increment()
+        }
     }
 }
 
