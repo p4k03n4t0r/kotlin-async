@@ -3,25 +3,24 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import java.io.File
 
-fun main() {
-    val threads = 10
-    val max = 10000000000L
-    val scale = 1000000000L
+fun main(args: Array<String>) {
+    val concurrent = System.getenv("CONCURRENT")?.toInt() ?: 10
+    val max = System.getenv("MAX")?.toLong() ?: 10000000000L
+    val scale = System.getenv("SCALE")?.toLong() ?: 1000000000L
 
     var measurements = mutableListOf<Measurement>()
     for(i in scale..max step scale) {
-//        val totalWork = 10F.pow(i).toLong()
         var totalWork = i
         println(i)
         var results = mutableListOf<Result>()
-        results.addAll(isolated(totalWork, threads))
-        results.addAll(returned(totalWork, threads))
-        results.addAll(shared(totalWork, threads))
+        results.addAll(isolated(totalWork, concurrent))
+        results.addAll(returned(totalWork, concurrent))
+        results.addAll(shared(totalWork, concurrent))
 
         measurements.add(Measurement(totalWork.toString(), results))
     }
 
-    writeResults(measurements, "output.csv")
+    writeResults(measurements, "output/output.csv")
 }
 
 private fun writeResults(measurements: MutableList<Measurement>, fileName: String) {

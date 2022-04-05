@@ -6,18 +6,18 @@ import kotlinx.coroutines.runBlocking
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
-fun returned(totalWork: Long, threads: Int): List<Result> {
+fun returned(totalWork: Long, concurrent: Int): List<Result> {
     val results = mutableListOf<Result>()
-    val workPerThread =  totalWork/threads
+    val workPerThread =  totalWork/concurrent
 
     results.add(timeWithReturn(totalWork, "Returned-SingleThreaded") { w ->
         return@timeWithReturn work(w)
     })
 
     results.add(timeWithReturn(workPerThread, "Returned-Multithreaded") { w ->
-        val executor = Executors.newFixedThreadPool(threads)
+        val executor = Executors.newFixedThreadPool(concurrent)
         val works = mutableListOf<Callable<Long>>()
-        for (i in 1..threads) {
+        for (i in 1..concurrent) {
             val worker = Callable { work(w) }
             executor.submit(worker)
             works.add(worker)
@@ -31,7 +31,7 @@ fun returned(totalWork: Long, threads: Int): List<Result> {
     results.add(timeWithReturn(workPerThread, "Returned-Coroutines") { w ->
         runBlocking {
             val coroutines = mutableListOf<Deferred<Long>>()
-            for (i in 1..threads) {
+            for (i in 1..concurrent) {
                 val job = async {
                     return@async workAsync(w).await()
                 }

@@ -4,9 +4,9 @@ import kotlinx.coroutines.runBlocking
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
-fun shared(totalWork: Long, threads: Int): List<Result> {
+fun shared(totalWork: Long, concurrent: Int): List<Result> {
     val results = mutableListOf<Result>()
-    val workPerThread =  totalWork/threads
+    val workPerThread =  totalWork/concurrent
 
     var sharedCounter = Counter()
     val result1 = time(totalWork, "Shared-SingleThreaded") { w ->
@@ -17,8 +17,8 @@ fun shared(totalWork: Long, threads: Int): List<Result> {
 
     sharedCounter = Counter()
     val result2 = time(workPerThread, "Shared-Multithreaded") { w ->
-        val executor = Executors.newFixedThreadPool(threads)
-        for (i in 1..threads) {
+        val executor = Executors.newFixedThreadPool(concurrent)
+        for (i in 1..concurrent) {
             val worker = Callable { workShared(w, sharedCounter) }
             executor.submit(worker)
         }
@@ -33,7 +33,7 @@ fun shared(totalWork: Long, threads: Int): List<Result> {
     val result3 = time(workPerThread, "Shared-Coroutines") { w ->
         runBlocking {
             val coroutines = mutableListOf<Deferred<Unit>>()
-            for (i in 1..threads) {
+            for (i in 1..concurrent) {
                 val job = async {
                     return@async workSharedAsync(w, sharedCounter).await()
                 }

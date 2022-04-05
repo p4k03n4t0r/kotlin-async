@@ -2,4 +2,4 @@ bin/
 build/
 .gradle/
 .idea
-output.csv
+output/

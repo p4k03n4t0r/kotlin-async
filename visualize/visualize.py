@@ -1,12 +1,18 @@
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 from pyparsing import line
 
 
 results = {}
 
-with open('output.csv') as csv_file:
+if len(sys.argv) > 1:
+    f = sys.argv[1]
+else:
+    f = "../output/output.csv"
+
+with open(f) as csv_file:
     csv_reader = csv.reader(csv_file)
     for x, name, time, total_count in csv_reader:
         if x not in results:
