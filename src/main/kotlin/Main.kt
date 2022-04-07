@@ -7,20 +7,29 @@ fun main(args: Array<String>) {
     val concurrent = System.getenv("CONCURRENT")?.toInt() ?: 10
     val max = System.getenv("MAX")?.toLong() ?: 10000000000L
     val scale = System.getenv("SCALE")?.toLong() ?: 1000000000L
+    val modes = System.getenv("MODES")?.split(",") ?: listOf("isolated", "returned", "shared")
+    val outputFile = System.getenv("SCALE") ?: "output.csv"
 
     var measurements = mutableListOf<Measurement>()
     for(i in scale..max step scale) {
         var totalWork = i
         println(i)
         var results = mutableListOf<Result>()
-        results.addAll(isolated(totalWork, concurrent))
-        results.addAll(returned(totalWork, concurrent))
-        results.addAll(shared(totalWork, concurrent))
+        for(mode in modes) {
+            when (mode) {
+                "isolated" -> results.addAll(isolated(totalWork, concurrent))
+                "returned" -> results.addAll(returned(totalWork, concurrent))
+                "shared" -> results.addAll(shared(totalWork, concurrent))
+                else -> {
+                    println("Unknown mode $mode")
+                }
+            }
+        }
 
         measurements.add(Measurement(totalWork.toString(), results))
     }
 
-    writeResults(measurements, "output/output.csv")
+    writeResults(measurements, "output/$outputFile")
 }
 
 private fun writeResults(measurements: MutableList<Measurement>, fileName: String) {

@@ -4,6 +4,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.Executors
 
+/**
+ * Runs without shared variable or a return value
+ */
 fun isolated(totalWork: Long, concurrent: Int): List<Result> {
     val results = mutableListOf<Result>()
     val dividedWork =  totalWork/concurrent

@@ -6,6 +6,9 @@ import kotlinx.coroutines.runBlocking
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
+/**
+ * Runs and processes the result
+ */
 fun returned(totalWork: Long, concurrent: Int): List<Result> {
     val results = mutableListOf<Result>()
     val workPerThread =  totalWork/concurrent
