@@ -1,4 +1,3 @@
-
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -11,7 +10,7 @@ import java.util.concurrent.Executors
  */
 fun returned(totalWork: Long, concurrent: Int): List<Result> {
     val results = mutableListOf<Result>()
-    val workPerThread =  totalWork/concurrent
+    val workPerThread = totalWork / concurrent
 
     results.add(timeWithReturn(totalWork, "Returned-SingleThreaded") { w ->
         return@timeWithReturn work(w)

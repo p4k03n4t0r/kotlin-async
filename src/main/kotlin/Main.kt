@@ -1,4 +1,3 @@
-
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import java.io.File
@@ -11,11 +10,11 @@ fun main(args: Array<String>) {
     val outputFile = System.getenv("OUTPUT_FILE") ?: "output.csv"
 
     var measurements = mutableListOf<Measurement>()
-    for(i in scale..max step scale) {
+    for (i in scale..max step scale) {
         var totalWork = i
         println(i)
         var results = mutableListOf<Result>()
-        for(mode in modes) {
+        for (mode in modes) {
             when (mode) {
                 "isolated" -> results.addAll(isolated(totalWork, concurrent))
                 "returned" -> results.addAll(returned(totalWork, concurrent))

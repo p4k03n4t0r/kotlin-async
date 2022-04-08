@@ -9,7 +9,7 @@ import java.util.concurrent.Executors
  */
 fun isolated(totalWork: Long, concurrent: Int): List<Result> {
     val results = mutableListOf<Result>()
-    val dividedWork =  totalWork/concurrent
+    val dividedWork = totalWork / concurrent
 
     results.add(time(totalWork, "Isolated-SingleThreaded") { w ->
         work(w)

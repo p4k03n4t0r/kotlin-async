@@ -9,7 +9,7 @@ import java.util.concurrent.Executors
  */
 fun shared(totalWork: Long, concurrent: Int): List<Result> {
     val results = mutableListOf<Result>()
-    val workPerThread =  totalWork/concurrent
+    val workPerThread = totalWork / concurrent
 
     var sharedClass = SharedClass()
     val result1 = time(totalWork, "Shared-SingleThreaded") { w ->
