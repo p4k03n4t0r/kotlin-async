@@ -11,40 +11,40 @@ fun shared(totalWork: Long, concurrent: Int): List<Result> {
     val results = mutableListOf<Result>()
     val workPerThread =  totalWork/concurrent
 
-    var sharedCounter = Counter()
+    var sharedClass = SharedClass()
     val result1 = time(totalWork, "Shared-SingleThreaded") { w ->
-        workShared(w, sharedCounter)
+        workShared(w, sharedClass)
     }
-    result1.totalCount = sharedCounter.total
+    result1.totalCount = sharedClass.counter
     results.add(result1)
 
-    sharedCounter = Counter()
+    sharedClass = SharedClass()
     val result2 = time(workPerThread, "Shared-Multithreaded") { w ->
         val executor = Executors.newFixedThreadPool(concurrent)
         for (i in 1..concurrent) {
-            val worker = Callable { workShared(w, sharedCounter) }
+            val worker = Callable { workShared(w, sharedClass) }
             executor.submit(worker)
         }
         executor.shutdown()
         while (!executor.isTerminated) {
         }
     }
-    result2.totalCount = sharedCounter.total
+    result2.totalCount = sharedClass.counter
     results.add(result2)
 
-    sharedCounter = Counter()
+    sharedClass = SharedClass()
     val result3 = time(workPerThread, "Shared-Coroutines") { w ->
         runBlocking {
             val coroutines = mutableListOf<Deferred<Unit>>()
             for (i in 1..concurrent) {
                 val job = async {
-                    return@async workSharedAsync(w, sharedCounter).await()
+                    return@async workSharedAsync(w, sharedClass).await()
                 }
                 coroutines.add(job)
             }
         }
     }
-    result3.totalCount = sharedCounter.total
+    result3.totalCount = sharedClass.counter
     results.add(result3)
 
     return results

@@ -13,15 +13,14 @@ fun work(max: Long): Long {
     return max
 }
 
-fun workShared(max: Long, sharedCounter: Counter) {
+fun workShared(max: Long, sharedClass: SharedClass) {
     for (i in 1..max) {
-        sharedCounter.increment()
+        sharedClass.increment()
     }
 }
 
 suspend fun workAsync(max: Long): Deferred<Long> = coroutineScope {
     async {
-        // TODO: If the non suspend func work() is used, coroutines will be slower than single thread
         var counter = 0L
         for (i in 1..max) {
             counter++
@@ -33,16 +32,16 @@ suspend fun workAsync(max: Long): Deferred<Long> = coroutineScope {
     }
 }
 
-suspend fun workSharedAsync(max: Long, sharedCounter: Counter): Deferred<Unit> = coroutineScope {
+suspend fun workSharedAsync(max: Long, sharedClass: SharedClass): Deferred<Unit> = coroutineScope {
     async {
         for (i in 1..max) {
-            sharedCounter.increment()
+            sharedClass.increment()
         }
     }
 }
 
-class Counter constructor(var total: Long = 0L) {
+class SharedClass constructor(var counter: Long = 0L) {
     fun increment() {
-        total++
+        counter++
     }
 }

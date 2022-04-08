@@ -8,7 +8,7 @@ fun main(args: Array<String>) {
     val max = System.getenv("MAX")?.toLong() ?: 10000000000L
     val scale = System.getenv("SCALE")?.toLong() ?: 1000000000L
     val modes = System.getenv("MODES")?.split(",") ?: listOf("isolated", "returned", "shared")
-    val outputFile = System.getenv("SCALE") ?: "output.csv"
+    val outputFile = System.getenv("OUTPUT_FILE") ?: "output.csv"
 
     var measurements = mutableListOf<Measurement>()
     for(i in scale..max step scale) {
