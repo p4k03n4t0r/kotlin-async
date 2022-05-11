@@ -21,22 +21,13 @@ fun workShared(max: Long, sharedClass: SharedClass) {
 
 suspend fun workAsync(max: Long): Deferred<Long> = coroutineScope {
     async {
-        var counter = 0L
-        for (i in 1..max) {
-            counter++
-        }
-        if (counter != max) {
-            println("Counter mismatch")
-        }
-        return@async max
+        return@async work(max)
     }
 }
 
 suspend fun workSharedAsync(max: Long, sharedClass: SharedClass): Deferred<Unit> = coroutineScope {
     async {
-        for (i in 1..max) {
-            sharedClass.increment()
-        }
+        return@async workShared(max, sharedClass)
     }
 }
 
