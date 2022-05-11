@@ -4,6 +4,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * Runs and processes the result
@@ -25,8 +26,7 @@ fun returned(totalWork: Long, concurrent: Int): List<Result> {
             works.add(worker)
         }
         executor.shutdown()
-        while (!executor.isTerminated) {
-        }
+        executor.awaitTermination(1, TimeUnit.DAYS)
         return@timeWithReturn works.sumOf { it.call() }
     })
 

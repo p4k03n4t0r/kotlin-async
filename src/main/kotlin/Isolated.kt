@@ -3,6 +3,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * Runs without shared variable or a return value
@@ -22,8 +23,7 @@ fun isolated(totalWork: Long, concurrent: Int): List<Result> {
             executor.submit(worker)
         }
         executor.shutdown()
-        while (!executor.isTerminated) {
-        }
+        executor.awaitTermination(1, TimeUnit.DAYS)
     })
 
     results.add(time(dividedWork, "Isolated-Coroutines") { w ->
