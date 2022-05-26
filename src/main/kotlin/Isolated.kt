@@ -1,7 +1,5 @@
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import java.lang.Runnable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -26,7 +24,7 @@ fun isolated(totalWork: Long, concurrent: Int): List<Result> {
         executor.awaitTermination(1, TimeUnit.DAYS)
     })
 
-    results.add(time(dividedWork, "Isolated-Coroutines") { w ->
+    results.add(time(dividedWork, "Isolated-CoroutinesDefault") { w ->
         runBlocking {
             val coroutines = mutableListOf<Deferred<Unit>>()
             for (i in 1..concurrent) {
@@ -36,6 +34,36 @@ fun isolated(totalWork: Long, concurrent: Int): List<Result> {
                 coroutines.add(job)
             }
             coroutines.awaitAll()
+        }
+    })
+
+    results.add(time(dividedWork, "Isolated-CoroutinesIO") { w ->
+        runBlocking {
+            withContext(Dispatchers.IO) {
+                val coroutines = mutableListOf<Deferred<Unit>>()
+                for (i in 1..concurrent) {
+                    val job = async<Unit> {
+                        workAsync(w).await()
+                    }
+                    coroutines.add(job)
+                }
+                coroutines.awaitAll()
+            }
+        }
+    })
+
+    results.add(time(dividedWork, "Isolated-CoroutinesST") { w ->
+        runBlocking {
+            withContext(newSingleThreadContext("MyOwnThread")) {
+                val coroutines = mutableListOf<Deferred<Unit>>()
+                for (i in 1..concurrent) {
+                    val job = async<Unit> {
+                        workAsync(w).await()
+                    }
+                    coroutines.add(job)
+                }
+                coroutines.awaitAll()
+            }
         }
     })
 

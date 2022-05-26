@@ -1,6 +1,4 @@
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -13,14 +11,14 @@ fun shared(totalWork: Long, concurrent: Int): List<Result> {
     val workPerThread = totalWork / concurrent
 
     var sharedClass = SharedClass()
-    val result1 = time(totalWork, "Shared-SingleThreaded") { w ->
+    var result = time(totalWork, "Shared-SingleThreaded") { w ->
         workShared(w, sharedClass)
     }
-    result1.totalCount = sharedClass.counter
-    results.add(result1)
+    result.totalCount = sharedClass.counter
+    results.add(result)
 
     sharedClass = SharedClass()
-    val result2 = time(workPerThread, "Shared-Multithreaded") { w ->
+    result = time(workPerThread, "Shared-Multithreaded") { w ->
         val executor = Executors.newFixedThreadPool(concurrent)
         for (i in 1..concurrent) {
             val worker = Callable { workShared(w, sharedClass) }
@@ -29,23 +27,57 @@ fun shared(totalWork: Long, concurrent: Int): List<Result> {
         executor.shutdown()
         executor.awaitTermination(1, TimeUnit.DAYS)
     }
-    result2.totalCount = sharedClass.counter
-    results.add(result2)
+    result.totalCount = sharedClass.counter
+    results.add(result)
 
     sharedClass = SharedClass()
-    val result3 = time(workPerThread, "Shared-Coroutines") { w ->
+    result = time(workPerThread, "Shared-CoroutinesDefault") { w ->
         runBlocking {
             val coroutines = mutableListOf<Deferred<Unit>>()
             for (i in 1..concurrent) {
                 val job = async {
-                    return@async workSharedAsync(w, sharedClass).await()
+                    workSharedAsync(w, sharedClass).await()
                 }
                 coroutines.add(job)
             }
         }
     }
-    result3.totalCount = sharedClass.counter
-    results.add(result3)
+    result.totalCount = sharedClass.counter
+    results.add(result)
+
+    sharedClass = SharedClass()
+    result = time(workPerThread, "Shared-CoroutinesIO") { w ->
+        runBlocking {
+            withContext(Dispatchers.IO) {
+                val coroutines = mutableListOf<Deferred<Unit>>()
+                for (i in 1..concurrent) {
+                    val job = async {
+                        workSharedAsync(w, sharedClass).await()
+                    }
+                    coroutines.add(job)
+                }
+            }
+        }
+    }
+    result.totalCount = sharedClass.counter
+    results.add(result)
+
+    sharedClass = SharedClass()
+    result = time(workPerThread, "Shared-CoroutinesST") { w ->
+        runBlocking {
+            withContext(newSingleThreadContext("MyOwnThread")) {
+                val coroutines = mutableListOf<Deferred<Unit>>()
+                for (i in 1..concurrent) {
+                    val job = async {
+                        workSharedAsync(w, sharedClass).await()
+                    }
+                    coroutines.add(job)
+                }
+            }
+        }
+    }
+    result.totalCount = sharedClass.counter
+    results.add(result)
 
     return results
 }

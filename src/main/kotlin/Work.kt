@@ -21,13 +21,13 @@ fun workShared(max: Long, sharedClass: SharedClass) {
 
 suspend fun workAsync(max: Long): Deferred<Long> = coroutineScope {
     async {
-        return@async work(max)
+        work(max)
     }
 }
 
 suspend fun workSharedAsync(max: Long, sharedClass: SharedClass): Deferred<Unit> = coroutineScope {
     async {
-        return@async workShared(max, sharedClass)
+        workShared(max, sharedClass)
     }
 }
 

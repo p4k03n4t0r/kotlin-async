@@ -1,7 +1,5 @@
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
+
+import kotlinx.coroutines.*
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -14,7 +12,7 @@ fun returned(totalWork: Long, concurrent: Int): List<Result> {
     val workPerThread = totalWork / concurrent
 
     results.add(timeWithReturn(totalWork, "Returned-SingleThreaded") { w ->
-        return@timeWithReturn work(w)
+        work(w)
     })
 
     results.add(timeWithReturn(workPerThread, "Returned-Multithreaded") { w ->
@@ -27,19 +25,49 @@ fun returned(totalWork: Long, concurrent: Int): List<Result> {
         }
         executor.shutdown()
         executor.awaitTermination(1, TimeUnit.DAYS)
-        return@timeWithReturn works.sumOf { it.call() }
+        works.sumOf { it.call() }
     })
 
-    results.add(timeWithReturn(workPerThread, "Returned-Coroutines") { w ->
+    results.add(timeWithReturn(workPerThread, "Returned-CoroutinesDefault") { w ->
         runBlocking {
             val coroutines = mutableListOf<Deferred<Long>>()
             for (i in 1..concurrent) {
                 val job = async {
-                    return@async workAsync(w).await()
+                    workAsync(w).await()
                 }
                 coroutines.add(job)
             }
-            return@runBlocking coroutines.awaitAll().sum()
+            coroutines.awaitAll().sum()
+        }
+    })
+
+    results.add(timeWithReturn(workPerThread, "Returned-CoroutinesIO") { w ->
+        runBlocking {
+            withContext(Dispatchers.IO) {
+                val coroutines = mutableListOf<Deferred<Long>>()
+                for (i in 1..concurrent) {
+                    val job = async {
+                        workAsync(w).await()
+                    }
+                    coroutines.add(job)
+                }
+                coroutines.awaitAll().sum()
+            }
+        }
+    })
+
+    results.add(timeWithReturn(workPerThread, "Returned-CoroutinesST") { w ->
+        runBlocking {
+            withContext(newSingleThreadContext("MyOwnThread")) {
+                val coroutines = mutableListOf<Deferred<Long>>()
+                for (i in 1..concurrent) {
+                    val job = async {
+                        workAsync(w).await()
+                    }
+                    coroutines.add(job)
+                }
+                coroutines.awaitAll().sum()
+            }
         }
     })
 
