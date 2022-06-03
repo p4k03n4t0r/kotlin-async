@@ -7,15 +7,15 @@ import java.util.concurrent.TimeUnit
 /**
  * Runs and processes the result
  */
-fun returned(totalWork: Long, concurrent: Int): List<Result> {
+fun returned(totalWork: Long, concurrent: Int, cpus: Int): List<Result> {
     val results = mutableListOf<Result>()
     val workPerThread = totalWork / concurrent
 
-    results.add(timeWithReturn(totalWork, "Returned-SingleThreaded") { w ->
+    results.add(timeWithReturn(totalWork, "Returned-SingleThreaded-$cpus") { w ->
         work(w)
     })
 
-    results.add(timeWithReturn(workPerThread, "Returned-Multithreaded") { w ->
+    results.add(timeWithReturn(workPerThread, "Returned-Multithreaded-$cpus") { w ->
         val executor = Executors.newFixedThreadPool(concurrent)
         val works = mutableListOf<Callable<Long>>()
         for (i in 1..concurrent) {
@@ -28,7 +28,7 @@ fun returned(totalWork: Long, concurrent: Int): List<Result> {
         works.sumOf { it.call() }
     })
 
-    results.add(timeWithReturn(workPerThread, "Returned-CoroutinesDefault") { w ->
+    results.add(timeWithReturn(workPerThread, "Returned-CoroutinesDefault-$cpus") { w ->
         runBlocking {
             val coroutines = mutableListOf<Deferred<Long>>()
             for (i in 1..concurrent) {
@@ -41,7 +41,7 @@ fun returned(totalWork: Long, concurrent: Int): List<Result> {
         }
     })
 
-    results.add(timeWithReturn(workPerThread, "Returned-CoroutinesIO") { w ->
+    results.add(timeWithReturn(workPerThread, "Returned-CoroutinesIO-$cpus") { w ->
         runBlocking {
             withContext(Dispatchers.IO) {
                 val coroutines = mutableListOf<Deferred<Long>>()
@@ -56,7 +56,7 @@ fun returned(totalWork: Long, concurrent: Int): List<Result> {
         }
     })
 
-    results.add(timeWithReturn(workPerThread, "Returned-CoroutinesST") { w ->
+    results.add(timeWithReturn(workPerThread, "Returned-CoroutinesST-$cpus") { w ->
         runBlocking {
             withContext(newSingleThreadContext("MyOwnThread")) {
                 val coroutines = mutableListOf<Deferred<Long>>()

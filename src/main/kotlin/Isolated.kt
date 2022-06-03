@@ -6,15 +6,15 @@ import java.util.concurrent.TimeUnit
 /**
  * Runs without shared variable or a return value
  */
-fun isolated(totalWork: Long, concurrent: Int): List<Result> {
+fun isolated(totalWork: Long, concurrent: Int, cpus: Int): List<Result> {
     val results = mutableListOf<Result>()
     val dividedWork = totalWork / concurrent
 
-    results.add(time(totalWork, "Isolated-SingleThreaded") { w ->
+    results.add(time(totalWork, "Isolated-SingleThreaded-$cpus") { w ->
         work(w)
     })
 
-    results.add(time(dividedWork, "Isolated-Multithreaded") { w ->
+    results.add(time(dividedWork, "Isolated-Multithreaded-$cpus") { w ->
         val executor = Executors.newFixedThreadPool(concurrent)
         for (i in 1..concurrent) {
             val worker = Runnable { work(w) }
@@ -24,7 +24,7 @@ fun isolated(totalWork: Long, concurrent: Int): List<Result> {
         executor.awaitTermination(1, TimeUnit.DAYS)
     })
 
-    results.add(time(dividedWork, "Isolated-CoroutinesDefault") { w ->
+    results.add(time(dividedWork, "Isolated-CoroutinesDefault-$cpus") { w ->
         runBlocking {
             val coroutines = mutableListOf<Deferred<Unit>>()
             for (i in 1..concurrent) {
@@ -37,7 +37,7 @@ fun isolated(totalWork: Long, concurrent: Int): List<Result> {
         }
     })
 
-    results.add(time(dividedWork, "Isolated-CoroutinesIO") { w ->
+    results.add(time(dividedWork, "Isolated-CoroutinesIO-$cpus") { w ->
         runBlocking {
             withContext(Dispatchers.IO) {
                 val coroutines = mutableListOf<Deferred<Unit>>()
@@ -52,7 +52,7 @@ fun isolated(totalWork: Long, concurrent: Int): List<Result> {
         }
     })
 
-    results.add(time(dividedWork, "Isolated-CoroutinesST") { w ->
+    results.add(time(dividedWork, "Isolated-CoroutinesST-$cpus") { w ->
         runBlocking {
             withContext(newSingleThreadContext("MyOwnThread")) {
                 val coroutines = mutableListOf<Deferred<Unit>>()

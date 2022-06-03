@@ -2,11 +2,12 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import java.io.File
 
-fun main(args: Array<String>) {
+fun main() {
     val concurrent = System.getenv("CONCURRENT")?.toInt() ?: 10
     val max = System.getenv("MAX")?.toLong() ?: 10000000000L
     val scale = System.getenv("SCALE")?.toLong() ?: 1000000000L
     val modes = System.getenv("MODES")?.split(",") ?: listOf("isolated", "returned", "shared")
+    val cpus = System.getenv("CPUS")?.toInt() ?: 0
     val outputFile = System.getenv("OUTPUT_FILE") ?: "output.csv"
 
     var measurements = mutableListOf<Measurement>()
@@ -16,9 +17,9 @@ fun main(args: Array<String>) {
         var results = mutableListOf<Result>()
         for (mode in modes) {
             when (mode) {
-                "isolated" -> results.addAll(isolated(totalWork, concurrent))
-                "returned" -> results.addAll(returned(totalWork, concurrent))
-                "shared" -> results.addAll(shared(totalWork, concurrent))
+                "isolated" -> results.addAll(isolated(totalWork, concurrent, cpus))
+                "returned" -> results.addAll(returned(totalWork, concurrent, cpus))
+                "shared" -> results.addAll(shared(totalWork, concurrent, cpus))
                 else -> {
                     println("Unknown mode $mode")
                 }
